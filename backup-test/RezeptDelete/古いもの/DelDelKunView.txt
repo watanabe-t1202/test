@@ -1,0 +1,60 @@
+--exec [dbo].[DelDelKunView] 20150101,20151231,50000
+--
+--2024/12/03 13:23:22：処理開始
+--削除開始 取込日：20150101
+--削除終了 取込日：20151231
+--1回のループで削除する件数：50,000 件
+-- 
+--2024/12/03 13:23:41：件数取得：76,391,707 件
+--総ループ数：1,528 回
+--2024/12/03 13:23:41：処理終了
+--
+--完了時刻: 2024-12-03T13:23:41.8008486+09:00
+
+
+
+CREATE PROCEDURE DelDelKunView
+    @DelStartYYYYMMDD NVARCHAR(8)
+   ,@DelEndYYYYMMDD   NVARCHAR(8)
+   ,@OneLoopDelCnt  int
+AS
+BEGIN
+
+    PRINT FORMAT(GETDATE(), 'yyyy/MM/dd HH:mm:ss') + '：処理開始'
+    PRINT '削除開始 取込日：' + @DelStartYYYYMMDD
+    PRINT '削除終了 取込日：' + @DelEndYYYYMMDD
+    PRINT '1回のループで削除する件数：' + FORMAT(@OneLoopDelCnt, '#,###') + ' 件'
+    PRINT ''
+
+    --変数
+    DECLARE @allCount INT = 0 --削除対象全件数
+
+    BEGIN TRY
+
+        -- トランザクション開始
+        --BEGIN TRANSACTION
+
+        --件数取得
+        SET @allCount = (SELECT count(*) FROM T_REZEPT WHERE TORIKOMI_YMD BETWEEN @DelStartYYYYMMDD AND @DelEndYYYYMMDD)
+
+
+
+        PRINT FORMAT(GETDATE(), 'yyyy/MM/dd HH:mm:ss') + '：件数取得：' + FORMAT(@allCount, '#,###') + ' 件'
+
+        PRINT '総ループ数：' + FORMAT((@allCount / @OneLoopDelCnt) + 0.5, '#,###') + ' 回'
+
+
+        -- コミット
+        --COMMIT TRANSACTION
+
+    END TRY
+
+    BEGIN CATCH 
+
+        --ROLLBACK TRANSACTION
+
+    END CATCH
+
+    PRINT FORMAT(GETDATE(), 'yyyy/MM/dd HH:mm:ss') + '：処理終了'
+
+END
